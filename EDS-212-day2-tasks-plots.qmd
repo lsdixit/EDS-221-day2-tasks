@@ -1,0 +1,71 @@
+---
+title: "EDS-212-day2-tasks-plots"
+format: html
+execute:
+  warning: false
+  message: false
+editor_options: 
+  chunk_output_type: console
+---
+
+Load packages
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+read in data
+```{r}
+mack_verts <- read_csv(here::here("data", "AS00601.csv")) %>%
+  clean_names()
+view(mack_verts)
+```
+
+access individual parts of the data frame
+```{r}
+mc_wt_5 <- mack_verts$weight[5]
+mc_wt_5
+
+mc_length_8_20 <- mack_verts$length1[8:20]
+mc_length_8_20
+
+mc_dates <- mack_verts$sampledate
+```
+
+make salamander subset
+```{r}
+mc_salamanders <- mack_verts[mack_verts$species == "DITE", ]
+mc_salamanders
+```
+
+create a scatterplot
+```{r fig.cap = "data source = Gregory, S.V. and I. Arismendi. 2020. Aquatic Vertebrate Population Study in Mack Creek, Andrews Experimental Forest, 1987 to present ver 14. Environmental Data Initiative. https://doi.org/10.6073/pasta/7c78d662e847cdbe33584add8f809165 (Accessed 2025-08-12)."}
+
+ggplot(data = mc_salamanders, aes(x = length1, y = weight)) +
+  geom_point(color = "green4")+
+  labs(title = "Pacific Giant Salamanders length (mm) vs weight (g)",
+       x = "Length (mm)",
+       y = "Weight (g)")
+
+ggsave(here::here("figs", "salamander_size.png"), height = 5, width = 6)
+```
+
+create plot for cutthroat
+```{r}
+# subset data for trout
+mc_trout <- mack_verts[mack_verts$species == "ONCL", ] %>%
+  na.omit(mc_trout$reach)
+mc_trout
+
+ggplot(data = mc_trout, aes(x = length1, y = weight, color = reach)) +
+  geom_point() +
+  scale_color_manual(values = c("blue", "purple", "pink")) +
+  facet_wrap(~reach) +
+  labs(title = "Cutthroat trout length (mm) vs weight (g)",
+       x = "Length (mm)",
+       y = "Weight (g)")
+
+ggsave(here::here("figs", "cutthroat_size.png"), height = 5, width = 6)
+```
+
